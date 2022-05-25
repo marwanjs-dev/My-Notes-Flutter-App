@@ -42,7 +42,7 @@ class _RegisterViewState extends State<RegisterView> {
         foregroundColor: Colors.blue,
       ),
       appBar: AppBar(
-        title: Text("Register page"),
+        title: const Text("Register page"),
       ),
       body: Column(
         children: [
