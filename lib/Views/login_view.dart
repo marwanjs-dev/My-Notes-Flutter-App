@@ -1,8 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mynotes/Constants/routes.dart';
+import 'dart:developer' as devtoools show log;
 
-import '../firebase_options.dart';
+import 'package:mynotes/firebase_options.dart';
+import 'package:mynotes/utilities/show_error_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({Key? key}) : super(key: key);
@@ -33,7 +36,7 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Login Page")),
+      appBar: AppBar(title: const Text("Login Page")),
       body: Column(
         children: [
           TextField(
@@ -56,27 +59,36 @@ class _LoginViewState extends State<LoginView> {
               onPressed: () async {
                 final password = _password.text;
                 final email = _email.text;
+                await Firebase.initializeApp(
+                  options: DefaultFirebaseOptions.web,
+                );
                 try {
                   final userCredentials = await FirebaseAuth.instance
                       .signInWithEmailAndPassword(
                           email: email, password: password);
-                  print(userCredentials);
+                  // devtoools.log(userCredentials.toString());
+                  Navigator.of(context)
+                      .pushNamedAndRemoveUntil(homeRoute, (route) => false);
                 } on FirebaseAuthException catch (e) {
                   if (e.code == 'user-not-found') {
-                    print("********************************************");
-                    print('user not found');
+                    await showErrorDialog(
+                      context,
+                      "User not found",
+                    );
+                  } else if (e.code == "wrong-password") {
+                    await showErrorDialog(context, "invalid password");
                   } else {
-                    print(e.code);
-                    print("something else happened");
+                    await showErrorDialog(context, "Error: ${e.code}");
                   }
-                  print(e.code);
+                } catch (e) {
+                  await showErrorDialog(context, e.toString());
                 }
               },
               child: const Text("Login")),
           TextButton(
               onPressed: () {
                 Navigator.of(context)
-                    .pushNamedAndRemoveUntil('/register/', (route) => false);
+                    .pushNamedAndRemoveUntil(registerRoute, (route) => false);
               },
               child: const Text("Not Registered Yet? Register Here "))
         ],

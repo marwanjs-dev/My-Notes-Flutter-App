@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mynotes/Constants/routes.dart';
 
 import '../firebase_options.dart';
 
@@ -34,14 +34,18 @@ class _RegisterViewState extends State<RegisterView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context)
-              .pushNamedAndRemoveUntil('/login/', (route) => false);
-        },
-        foregroundColor: Colors.blue,
-      ),
       appBar: AppBar(
+        leading: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            BackButton(
+              onPressed: () {
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil(loginRoute, (route) => false);
+              },
+            )
+          ],
+        ),
         title: const Text("Register page"),
       ),
       body: Column(
