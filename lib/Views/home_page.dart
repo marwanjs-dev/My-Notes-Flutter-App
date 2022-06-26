@@ -1,11 +1,12 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'dart:developer' as devtools show log;
 
 import 'package:mynotes/Constants/routes.dart';
+import 'package:mynotes/Services/auth/auth_service.dart';
+
+import '../enums/menu_actions.dart';
 
 class HomePage2 extends StatefulWidget {
   const HomePage2({Key? key}) : super(key: key);
@@ -13,8 +14,6 @@ class HomePage2 extends StatefulWidget {
   @override
   State<HomePage2> createState() => _HomePage2State();
 }
-
-enum MenuAction { logout }
 
 class _HomePage2State extends State<HomePage2> {
   @override
@@ -29,7 +28,7 @@ class _HomePage2State extends State<HomePage2> {
                   final shouldLogOut = await showLogOutConfirmation(context);
                   print(await shouldLogOut);
                   if (shouldLogOut) {
-                    await FirebaseAuth.instance.signOut();
+                    await AuthService.firebase().logOut();
                     Navigator.of(context)
                         .pushNamedAndRemoveUntil(loginRoute, (_) => false);
                   }

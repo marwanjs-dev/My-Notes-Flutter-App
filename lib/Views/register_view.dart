@@ -1,7 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:mynotes/Constants/routes.dart';
+import 'package:mynotes/Services/auth/auth_exceptions.dart';
+import 'package:mynotes/Services/auth/auth_service.dart';
 import 'package:mynotes/utilities/show_error_dialog.dart';
 import 'dart:developer' as devtools show log;
 
@@ -72,28 +74,27 @@ class _RegisterViewState extends State<RegisterView> {
           ),
           TextButton(
               onPressed: () async {
-                await Firebase.initializeApp(
-                    options: DefaultFirebaseOptions.currentPlatform);
+                await AuthService.firebase().initialize();
 
                 final email = _email.text;
                 final password = _password.text;
                 try {
-                  final userCredential = await FirebaseAuth.instance
-                      .createUserWithEmailAndPassword(
-                          email: email, password: password);
-                  final user = FirebaseAuth.instance.currentUser;
-                  await user?.sendEmailVerification();
+                  final userCredential =
+                      await AuthService.firebase().createUser(
+                    email: email,
+                    password: password,
+                  );
+                  final user = AuthService.firebase().currentUser;
+                  await AuthService.firebase().sendEmailVerification();
                   Navigator.of(context).pushNamed(VerifyEmailRoute);
-                } on FirebaseAuthException catch (e) {
-                  if (e.code == 'weak-password') {
-                    showErrorDialog(context, "weak password");
-                  } else if (e.code == 'email-already-in-use') {
-                    showErrorDialog(context, "email already in use");
-                  } else if (e.code == 'invalid-email') {
-                    showErrorDialog(context, "invalid email");
-                  } else {
-                    showErrorDialog(context, "${e.code}");
-                  }
+                } on WeakPasswordAuthException {
+                  showErrorDialog(context, "weak password");
+                } on EmailAlreadyInUseAuthException {
+                  showErrorDialog(context, "email already in use");
+                } on InvalidEmailAuthException {
+                  showErrorDialog(context, "invalid email");
+                } on GenericAuthException {
+                  showErrorDialog(context, "Failed to Register");
                 }
               },
               child: const Text("Register")),
