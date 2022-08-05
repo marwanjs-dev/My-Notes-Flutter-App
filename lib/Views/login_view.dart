@@ -3,9 +3,8 @@ import 'package:mynotes/Constants/routes.dart';
 import 'package:mynotes/Services/auth/auth_exceptions.dart';
 import 'package:mynotes/Services/auth/auth_service.dart';
 import 'dart:developer' as devtoools show log;
-
 import 'package:mynotes/firebase_options.dart';
-import 'package:mynotes/utilities/show_error_dialog.dart';
+import '../utilities/dialogs/error_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({Key? key}) : super(key: key);
@@ -72,7 +71,7 @@ class _LoginViewState extends State<LoginView> {
                         .pushNamedAndRemoveUntil(homeRoute, (route) => false);
                   } else {
                     Navigator.of(context).pushNamedAndRemoveUntil(
-                        VerifyEmailRoute, (route) => false);
+                        verifyEmailRoute, (route) => false);
                   }
                 } on UserNotFoundAuthException {
                   // ignore: use_build_context_synchronously
