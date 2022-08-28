@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:mynotes/extensions/list/filter.dart';
 import 'package:mynotes/utilities/dialogs/error_dialog.dart';
 import "package:sqflite/sqflite.dart";
 import "package:path_provider/path_provider.dart";
@@ -10,6 +11,7 @@ import 'constants.dart';
 import 'exceptions.dart';
 
 class NoteService {
+  DataBaseUser? _user;
   Database? _db;
 
   List<DataBaseNote> _notes = [];
@@ -24,15 +26,33 @@ class NoteService {
   factory NoteService() => _shared;
 
   late final StreamController<List<DataBaseNote>> _notesStreamController;
-  Stream<List<DataBaseNote>> get allNotes => _notesStreamController.stream;
+  Stream<List<DataBaseNote>> get allNotes =>
+      _notesStreamController.stream.filter((note) {
+        final currentUser = _user;
+        if (currentUser != null) {
+          return note.userId == currentUser.id;
+          //if the note in the database has the currentUser's id then return true for this note
+        } else {
+          throw UserShouldBeSetBeforeReadingAllNotes();
+        }
+      });
 
-  Future<DataBaseUser> getOrCreateUser({required String email}) async {
+  Future<DataBaseUser> getOrCreateUser({
+    required String email,
+    bool setAsCurrentUser = true,
+  }) async {
     await _ensureDbIsOpen();
     try {
       final user = await getUser(Email: email);
+      if (setAsCurrentUser) {
+        _user = user;
+      }
       return user;
     } on UserNotFoundDatabaseException {
       final createdUser = await createUser(Email: email);
+      if (setAsCurrentUser) {
+        _user = createdUser;
+      }
       return createdUser;
     } catch (e) {
       rethrow;
@@ -98,32 +118,32 @@ class NoteService {
   }
 
   Future<DataBaseNote> updateNote({
-    required int id,
+    required DataBaseNote note,
     required String text,
   }) async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
-    final result = await db.query(
+
+    await getNote(Id: note.id);
+
+    final updateCount = await db.update(
       notesTable,
-      where: "id = ?",
-      whereArgs: [id],
-    );
-    if (result.isEmpty) {
-      throw CouldNotFindNoteException;
-    } else {
-      final updateCount = await db.update(notesTable, {
+      {
         textColumn: text,
         isSyncedWithCloudColumn: 0,
-      });
-      if (updateCount == 0) {
-        throw CouldNotUpdateNoteException;
-      } else {
-        final updatedNote = await getNote(Id: id);
-        _notes.removeWhere((note) => note.id == id);
-        _notes.add(updatedNote);
-        _notesStreamController.add(_notes);
-        return updatedNote;
-      }
+      },
+      where: "id = ?",
+      whereArgs: [note.id],
+    );
+
+    if (updateCount == 0) {
+      throw CouldNotUpdateNoteException;
+    } else {
+      final updatedNote = await getNote(Id: note.id);
+      _notes.removeWhere((note) => note.id == note.id);
+      _notes.add(updatedNote);
+      _notesStreamController.add(_notes);
+      return updatedNote;
     }
   }
 

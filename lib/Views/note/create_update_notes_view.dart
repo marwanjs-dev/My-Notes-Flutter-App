@@ -32,7 +32,7 @@ class _CreateUpdateNotesViewState extends State<CreateUpdateNotesView> {
       return;
     }
     final text = _textEditingController.text;
-    await _noteService.updateNote(id: note.id, text: text);
+    await _noteService.updateNote(note: note, text: text);
   }
 
   void _setupTextControllerListener() {
@@ -72,7 +72,7 @@ class _CreateUpdateNotesViewState extends State<CreateUpdateNotesView> {
     final note = _note;
     final text = _textEditingController.text;
     if (text.isNotEmpty && note != null) {
-      await _noteService.updateNote(id: note.id, text: text);
+      await _noteService.updateNote(note: note, text: text);
     }
   }
 

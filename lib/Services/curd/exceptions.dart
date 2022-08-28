@@ -23,3 +23,5 @@ class CouldNotUpdateNoteException implements Exception {}
 class CouldNotGetNoteException implements Exception {}
 
 class CouldNotCreateUserException implements Exception {}
+
+class UserShouldBeSetBeforeReadingAllNotes implements Exception {}

@@ -89,7 +89,7 @@ class _HomePage2State extends State<HomePage2> {
                           return const CircularProgressIndicator();
                         }
                       default:
-                        return CircularProgressIndicator();
+                        return const CircularProgressIndicator();
                     }
                   });
             default:
