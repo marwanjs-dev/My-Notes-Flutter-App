@@ -32,7 +32,10 @@ class _CreateUpdateNotesViewState extends State<CreateUpdateNotesView> {
       return;
     }
     final text = _textEditingController.text;
-    await _noteService.updateNote(note: note, text: text);
+    await _noteService.updateNote(
+      note: note,
+      text: text,
+    );
   }
 
   void _setupTextControllerListener() {
@@ -40,7 +43,10 @@ class _CreateUpdateNotesViewState extends State<CreateUpdateNotesView> {
     _textEditingController.addListener(_textControllerListener);
   }
 
-  Future<DataBaseNote> createOrGetExistingNote(BuildContext context) async {
+  Future<DataBaseNote> createOrGetExistingNote(
+    BuildContext context, {
+    bool newNote = true,
+  }) async {
     final widgetNote = context.getArgument<DataBaseNote>();
 
     if (widgetNote != null) {
@@ -50,9 +56,10 @@ class _CreateUpdateNotesViewState extends State<CreateUpdateNotesView> {
     }
 
     final existingNote = _note;
-    if (existingNote != null) {
+    if (existingNote != null && existingNote.text != "") {
       return existingNote;
     }
+
     final currentUser = AuthService.firebase().currentUser!;
     final email = currentUser.email!;
     final owner = await _noteService.getOrCreateUser(email: email);
@@ -87,30 +94,32 @@ class _CreateUpdateNotesViewState extends State<CreateUpdateNotesView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("bla wala shee"),
-        ),
-        body: FutureBuilder(
-            future: createOrGetExistingNote(context),
-            builder: (context, snapshot) {
-              // if (snapshot.hasError) {
-              //   print(snapshot.error);
-              // }
-              switch (snapshot.connectionState) {
-                case ConnectionState.done:
-                case ConnectionState.active:
-                  _setupTextControllerListener();
-                  return TextField(
-                    controller: _textEditingController,
-                    keyboardType: TextInputType.multiline,
-                    maxLines: 1,
-                    decoration: const InputDecoration(
-                      hintText: "start typing your note",
-                    ),
-                  );
-                default:
-                  return const CircularProgressIndicator();
-              }
-            }));
+      appBar: AppBar(
+        title: const Text("ok"),
+      ),
+      body: FutureBuilder(
+        future: createOrGetExistingNote(context),
+        builder: (context, snapshot) {
+          // if (snapshot.hasError) {
+          //   print(snapshot.error);
+          // }
+          switch (snapshot.connectionState) {
+            case ConnectionState.done:
+            case ConnectionState.active:
+              _setupTextControllerListener();
+              return TextField(
+                controller: _textEditingController,
+                keyboardType: TextInputType.multiline,
+                maxLines: 1,
+                decoration: const InputDecoration(
+                  hintText: "start typing your note",
+                ),
+              );
+            default:
+              return const CircularProgressIndicator();
+          }
+        },
+      ),
+    );
   }
 }

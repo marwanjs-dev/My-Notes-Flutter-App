@@ -29,7 +29,7 @@ const createUserTable = '''
 ''';
 
 const dropping = '''
-
+  DROP TABLE user;
   DROP TABLE note;
 
 
